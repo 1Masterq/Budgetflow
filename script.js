@@ -1,189 +1,610 @@
-const marketItems = [];
+                                                                 // ==========================================
+// NAIJABUDGIFY V2
+// ==========================================
 
-const ui = {
-  itemInput: document.getElementById("item"),
-  quantityInput: document.getElementById("quantity"),
-  amountInput: document.getElementById("amount"),
-  marketList: document.getElementById("marketList"),
-  itemCount: document.getElementById("itemCount"),
-  sumTotal: document.getElementById("sumTotal"),
-  grandTotal: document.getElementById("grandTotal"),
-  emptyMessage: document.getElementById("emptyMessage"),
-  addButton: document.getElementById("addItemBtn"),
-  clearButton: document.getElementById("clearListBtn"),
-};
 
-function init() {
-  ui.addButton.addEventListener("click", addItem);
-  ui.clearButton.addEventListener("click", clearList);
+// Store all market items
+let marketItems = [];
 
-  [ui.itemInput, ui.quantityInput, ui.amountInput].forEach((input) => {
-    input.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        addItem();
-      }
-    });
-  });
 
-  renderList();
+// Store the user's budget
+let budget = 0;
+
+
+
+// ==========================================
+// SET BUDGET
+// ==========================================
+
+function setBudget() {
+
+    // Get the budget input
+    let budgetInput =
+        Number(document.getElementById("budget").value);
+
+
+    // Check if budget is valid
+    if (budgetInput <= 0 || isNaN(budgetInput)) {
+
+        alert("Please enter a valid budget.");
+
+        return;
+    }
+
+
+    // Save the budget
+    budget = budgetInput;
+
+
+    // Update everything
+    updateDisplay();
+
+
+    // Clear the input
+    document.getElementById("budget").value = "";
+
 }
+
+
+
+// ==========================================
+// ADD ITEM
+// ==========================================
 
 function addItem() {
-  const itemName = ui.itemInput.value.trim();
-  const quantity = Number(ui.quantityInput.value);
-  const amount = Number(ui.amountInput.value);
 
-  if (!itemName) {
-    alert("Please enter an item.");
-    return;
-  }
+    // Get item name
+    let itemName =
+        document.getElementById("item").value.trim();
 
-  if (!Number.isFinite(quantity) || quantity <= 0) {
-    alert("Quantity must be greater than 0.");
-    return;
-  }
 
-  if (!Number.isFinite(amount) || amount < 0) {
-    alert("Please enter a valid price.");
-    return;
-  }
+    // Get quantity
+    let quantity =
+        Number(document.getElementById("quantity").value);
 
-  marketItems.push({ name: itemName, quantity, amount });
-  renderList();
-  clearInputs();
+
+    // Get price
+    let amount =
+        Number(document.getElementById("amount").value);
+
+
+    // Validate item name
+    if (itemName === "") {
+
+        alert("Please enter an item.");
+
+        return;
+    }
+
+
+    // Validate quantity
+    if (quantity <= 0 || isNaN(quantity)) {
+
+        alert("Please enter a valid quantity.");
+
+        return;
+    }
+
+
+    // Validate price
+    if (amount < 0 || isNaN(amount)) {
+
+        alert("Please enter a valid price.");
+
+        return;
+    }
+
+
+    // Create item object
+    let newItem = {
+
+        name: itemName,
+
+        quantity: quantity,
+
+        amount: amount
+
+    };
+
+
+    // Add item to array
+    marketItems.push(newItem);
+
+
+    // Update application
+    updateDisplay();
+
+
+    // Clear input fields
+    clearInputs();
+
 }
 
-function renderList() {
-  ui.marketList.innerHTML = "";
 
-  marketItems.forEach((item, index) => {
-    const row = document.createElement("tr");
-    const total = item.quantity * item.amount;
 
-    const indexCell = document.createElement("td");
-    indexCell.textContent = String(index + 1);
+// ==========================================
+// DISPLAY ITEMS
+// ==========================================
 
-    const nameCell = document.createElement("td");
-    const itemName = document.createElement("strong");
-    itemName.textContent = item.name;
-    nameCell.appendChild(itemName);
+function displayItems() {
 
-    const quantityCell = document.createElement("td");
-    const quantityInput = document.createElement("input");
-    quantityInput.type = "number";
-    quantityInput.className = "table-input";
-    quantityInput.value = String(item.quantity);
-    quantityInput.min = "1";
-    quantityInput.dataset.index = String(index);
-    quantityInput.addEventListener("change", handleQuantityChange);
-    quantityCell.appendChild(quantityInput);
+    let marketList =
+        document.getElementById("marketList");
 
-    const amountCell = document.createElement("td");
-    const amountInput = document.createElement("input");
-    amountInput.type = "number";
-    amountInput.className = "table-input";
-    amountInput.value = String(item.amount);
-    amountInput.min = "0";
-    amountInput.dataset.index = String(index);
-    amountInput.addEventListener("change", handleAmountChange);
-    amountCell.appendChild(amountInput);
 
-    const totalCell = document.createElement("td");
-    const totalValue = document.createElement("strong");
-    totalValue.textContent = formatMoney(total);
-    totalCell.appendChild(totalValue);
+    // Empty the table
+    marketList.innerHTML = "";
 
-    const actionCell = document.createElement("td");
-    const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.className = "delete-btn";
-    deleteButton.textContent = "Delete";
-    deleteButton.addEventListener("click", () => deleteItem(index));
-    actionCell.appendChild(deleteButton);
 
-    row.append(indexCell, nameCell, quantityCell, amountCell, totalCell, actionCell);
-    ui.marketList.appendChild(row);
-  });
+    // Loop through items
+    marketItems.forEach(function(item, index) {
 
-  updateTotal();
-  updateItemCount();
-  updateEmptyMessage();
+
+        // Calculate item total
+        let total =
+            item.quantity * item.amount;
+
+
+        // Create row
+        let row =
+            document.createElement("tr");
+
+
+        // Add content
+        row.innerHTML = `
+
+            <td>
+                ${index + 1}
+            </td>
+
+
+            <td>
+                <strong>
+                    ${item.name}
+                </strong>
+            </td>
+
+
+            <td>
+
+                <input
+                    type="number"
+                    class="table-input"
+                    value="${item.quantity}"
+                    min="1"
+                    onchange="
+                        updateQuantity(
+                            ${index},
+                            this.value
+                        )
+                    "
+                >
+
+            </td>
+
+
+            <td>
+
+                <input
+                    type="number"
+                    class="table-input"
+                    value="${item.amount}"
+                    min="0"
+                    onchange="
+                        updateAmount(
+                            ${index},
+                            this.value
+                        )
+                    "
+                >
+
+            </td>
+
+
+            <td>
+
+                <strong>
+                    ${formatMoney(total)}
+                </strong>
+
+            </td>
+
+
+            <td>
+
+                <button
+                    class="delete-btn"
+                    onclick="
+                        deleteItem(${index})
+                    "
+                >
+                    Delete
+                </button>
+
+            </td>
+
+        `;
+
+
+        // Add row to table
+        marketList.appendChild(row);
+
+    });
+
+
+    // Update empty message
+    updateEmptyMessage();
+
 }
 
-function handleQuantityChange(event) {
-  const index = Number(event.target.dataset.index);
-  const newQuantity = Number(event.target.value);
 
-  if (!Number.isFinite(newQuantity) || newQuantity <= 0) {
-    alert("Quantity must be greater than 0.");
-    renderList();
-    return;
-  }
 
-  marketItems[index].quantity = newQuantity;
-  renderList();
+// ==========================================
+// UPDATE QUANTITY
+// ==========================================
+
+function updateQuantity(index, value) {
+
+    let quantity = Number(value);
+
+
+    if (quantity <= 0 || isNaN(quantity)) {
+
+        alert("Quantity must be greater than 0.");
+
+        displayItems();
+
+        return;
+    }
+
+
+    marketItems[index].quantity =
+        quantity;
+
+
+    updateDisplay();
+
 }
 
-function handleAmountChange(event) {
-  const index = Number(event.target.dataset.index);
-  const newAmount = Number(event.target.value);
 
-  if (!Number.isFinite(newAmount) || newAmount < 0) {
-    alert("Please enter a valid price.");
-    renderList();
-    return;
-  }
 
-  marketItems[index].amount = newAmount;
-  renderList();
+// ==========================================
+// UPDATE PRICE
+// ==========================================
+
+function updateAmount(index, value) {
+
+    let amount = Number(value);
+
+
+    if (amount < 0 || isNaN(amount)) {
+
+        alert("Please enter a valid price.");
+
+        displayItems();
+
+        return;
+    }
+
+
+    marketItems[index].amount =
+        amount;
+
+
+    updateDisplay();
+
 }
+
+
+
+// ==========================================
+// DELETE ITEM
+// ==========================================
 
 function deleteItem(index) {
-  marketItems.splice(index, 1);
-  renderList();
+
+    marketItems.splice(index, 1);
+
+
+    updateDisplay();
+
 }
 
-function updateTotal() {
-  const grandTotal = marketItems.reduce((sum, item) => sum + item.quantity * item.amount, 0);
-  ui.sumTotal.textContent = formatMoney(grandTotal);
-  ui.grandTotal.textContent = formatMoney(grandTotal);
+
+
+// ==========================================
+// CALCULATE TOTAL SPENDING
+// ==========================================
+
+function calculateTotal() {
+
+    let total = 0;
+
+
+    marketItems.forEach(function(item) {
+
+        let itemTotal =
+            item.quantity * item.amount;
+
+
+        total += itemTotal;
+
+    });
+
+
+    return total;
+
 }
 
-function updateItemCount() {
-  ui.itemCount.textContent = String(marketItems.length);
+
+
+// ==========================================
+// UPDATE EVERYTHING
+// ==========================================
+
+function updateDisplay() {
+
+    // Update table
+    displayItems();
+
+
+    // Get total spending
+    let totalSpent =
+        calculateTotal();
+
+
+    // Calculate remaining money
+    let remaining =
+        budget - totalSpent;
+
+
+    // Update budget
+    document.getElementById("budgetDisplay")
+        .textContent =
+        formatMoney(budget);
+
+
+    // Update spent
+    document.getElementById("spentDisplay")
+        .textContent =
+        formatMoney(totalSpent);
+
+
+    // Update remaining
+    document.getElementById("remainingDisplay")
+        .textContent =
+        formatMoney(remaining);
+
+
+    // Update grand total
+    document.getElementById("grandTotal")
+        .textContent =
+        formatMoney(totalSpent);
+
+
+    // Update progress
+    updateProgress(
+        totalSpent
+    );
+
 }
+
+
+
+// ==========================================
+// UPDATE PROGRESS BAR
+// ==========================================
+
+function updateProgress(totalSpent) {
+
+    let progressBar =
+        document.getElementById("progressBar");
+
+
+    let percentageText =
+        document.getElementById("percentage");
+
+
+    let message =
+        document.getElementById("budgetMessage");
+
+
+    // If no budget has been set
+    if (budget <= 0) {
+
+        progressBar.style.width = "0%";
+
+        percentageText.textContent = "0%";
+
+        message.textContent =
+            "Set a budget to start tracking your spending.";
+
+        return;
+
+    }
+
+
+    // Calculate percentage
+    let percentage =
+        (totalSpent / budget) * 100;
+
+
+    // Limit visual bar to 100%
+    let barWidth =
+        Math.min(percentage, 100);
+
+
+    // Update bar
+    progressBar.style.width =
+        barWidth + "%";
+
+
+    // Display percentage
+    percentageText.textContent =
+        Math.round(percentage) + "%";
+
+
+    // Check budget status
+    if (totalSpent > budget) {
+
+        let amountOver =
+            totalSpent - budget;
+
+
+        message.textContent =
+            "⚠️ You are over budget by "
+            + formatMoney(amountOver);
+
+
+        progressBar.style.background =
+            "#dc3545";
+
+    }
+
+
+    else if (percentage >= 80) {
+
+        message.textContent =
+            "⚠️ You are getting close to your budget limit.";
+
+
+        progressBar.style.background =
+            "#ffc107";
+
+    }
+
+
+    else {
+
+        let remaining =
+            budget - totalSpent;
+
+
+        message.textContent =
+            "You still have "
+            + formatMoney(remaining)
+            + " available.";
+
+
+        progressBar.style.background =
+            "#198754";
+
+    }
+
+}
+
+
+
+// ==========================================
+// FORMAT MONEY
+// ==========================================
 
 function formatMoney(amount) {
-  return `₦${amount.toLocaleString("en-NG")}`;
+
+    return "₦" +
+        amount.toLocaleString(
+            "en-NG",
+            {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        );
+
 }
+
+
+
+// ==========================================
+// CLEAR INPUTS
+// ==========================================
 
 function clearInputs() {
-  ui.itemInput.value = "";
-  ui.quantityInput.value = "";
-  ui.amountInput.value = "";
+
+    document.getElementById("item").value = "";
+
+    document.getElementById("quantity").value = "";
+
+    document.getElementById("amount").value = "";
+
 }
 
-function clearList() {
-  if (marketItems.length === 0) {
-    return;
-  }
 
-  const confirmClear = confirm("Are you sure you want to clear the entire list?");
 
-  if (confirmClear) {
-    marketItems.length = 0;
-    renderList();
-  }
+// ==========================================
+// CLEAR EVERYTHING
+// ==========================================
+
+function clearEverything() {
+
+    if (
+        marketItems.length === 0 &&
+        budget === 0
+    ) {
+
+        return;
+
+    }
+
+
+    let confirmation =
+        confirm(
+            "Are you sure you want to clear your entire budget and market list?"
+        );
+
+
+    if (confirmation) {
+
+        // Empty market items
+        marketItems = [];
+
+
+        // Reset budget
+        budget = 0;
+
+
+        // Clear budget input
+        document.getElementById("budget").value = "";
+
+
+        // Update application
+        updateDisplay();
+
+    }
+
 }
+
+
+
+// ==========================================
+// EMPTY MESSAGE
+// ==========================================
 
 function updateEmptyMessage() {
-  ui.emptyMessage.style.display = marketItems.length === 0 ? "block" : "none";
+
+    let emptyMessage =
+        document.getElementById("emptyMessage");
+
+
+    if (marketItems.length === 0) {
+
+        emptyMessage.style.display =
+            "block";
+
+    }
+
+    else {
+
+        emptyMessage.style.display =
+            "none";
+
+    }
+
 }
 
-init();
 
 
+// ==========================================
+// START APPLICATION
+// ==========================================
 
-
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                         
+updateDisplay();                                                                                                                                                                                                                                                                                                                                                                        
