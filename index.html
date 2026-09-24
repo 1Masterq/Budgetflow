@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Market List Calculator</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>🛒 Budgeflow</h1>
+        <p>Calculate your shopping expenses easily</p>
+      </header>
+
+      <section class="input-section">
+        <div class="input-group">
+          <label for="item">Item</label>
+          <input type="text" id="item" placeholder="e.g. Yam" />
+        </div>
+
+        <div class="input-group">
+          <label for="quantity">Quantity</label>
+          <input type="number" id="quantity" placeholder="e.g. 2" min="1" />
+        </div>
+
+        <div class="input-group">
+          <label for="amount">Unit Price (₦)</label>
+          <input type="number" id="amount" placeholder="e.g. 500" min="0" />
+        </div>
+
+        <button id="addItemBtn" class="add-btn" type="button">+ Add Item</button>
+      </section>
+
+      <div class="summary">
+        <div>
+          <span>Items</span>
+          <strong id="itemCount">0</strong>
+        </div>
+
+        <div>
+          <span>Total</span>
+          <strong id="sumTotal">₦0</strong>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Total</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="marketList">
+            <!-- JavaScript will add items here -->
+          </tbody>
+        </table>
+
+        <div id="emptyMessage" class="empty-message">
+          <div class="empty-icon">🛒</div>
+          <h3>No items yet</h3>
+          <p>Add something to your market list above.</p>
+        </div>
+      </div>
+
+      <div class="grand-total">
+        <span>SUM TOTAL</span>
+        <strong id="grandTotal">₦0</strong>
+      </div>
+
+      <button id="clearListBtn" class="clear-btn" type="button">🗑 Clear List</button>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
