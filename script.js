@@ -9,6 +9,8 @@ let budget = activeBudget ? activeBudget.amount : 0;
 
 const ui = {
   budgetInput: document.getElementById("budget"),
+  saveBudgetButton: document.getElementById("saveBudgetButton"),
+  dashboardSaveLabel: document.getElementById("dashboardSaveLabel"),
   budgetDisplay: document.getElementById("budgetDisplay"),
   spentDisplay: document.getElementById("spentDisplay"),
   remainingDisplay: document.getElementById("remainingDisplay"),
@@ -106,6 +108,10 @@ function init() {
     ui.setBudgetButton.addEventListener("click", setBudget);
   }
 
+  if (ui.saveBudgetButton) {
+    ui.saveBudgetButton.addEventListener("click", saveBudgetFromHeading);
+  }
+
   if (ui.addButton) {
     ui.addButton.addEventListener("click", addItem);
   }
@@ -151,6 +157,7 @@ function init() {
   });
 
   renderList();
+  updateDashboardSaveButton(false);
 }
 
 function showDashboard() {
@@ -214,6 +221,37 @@ function setBudget() {
   renderList();
 }
 
+function saveBudgetFromHeading() {
+  if (!activeBudget) {
+    return;
+  }
+
+  const value = Number(ui.budgetInput.value);
+  if (!ui.budgetInput.value || !Number.isFinite(value) || value < 0) {
+    alert("Please enter a valid budget.");
+    return;
+  }
+
+  budget = value;
+  saveState();
+  renderList();
+  updateDashboardSaveButton(true);
+
+  window.setTimeout(() => {
+    showHome();
+  }, 1000);
+}
+
+function updateDashboardSaveButton(isSaved) {
+  if (!ui.saveBudgetButton || !ui.dashboardSaveLabel) {
+    return;
+  }
+
+  ui.saveBudgetButton.classList.toggle("saved", isSaved);
+  ui.dashboardSaveLabel.textContent = isSaved ? "Saved" : "Save";
+  ui.saveBudgetButton.setAttribute("aria-label", isSaved ? "Budget saved" : "Save budget");
+}
+
 function createBudget() {
   const name = ui.newBudgetNameInput.value.trim();
   const amount = Number(ui.newBudgetAmountInput.value);
@@ -240,6 +278,7 @@ function createBudget() {
   ui.newBudgetNameInput.value = "";
   ui.newBudgetAmountInput.value = "";
   showDashboard();
+  updateDashboardSaveButton(false);
 }
 
 function activateBudget(id) {

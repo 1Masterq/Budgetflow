@@ -74,9 +74,15 @@
       </main>
 
       <main id="dashboardView" class="dashboard-view hidden">
-        <button id="backHomeBtn" class="back-button" type="button" aria-label="Return to budgets" title="Return to budgets">
-          <span aria-hidden="true">⌂</span>
-        </button>
+        <div class="dashboard-topbar">
+          <button id="backHomeBtn" class="back-button" type="button" aria-label="Return to budgets" title="Return to budgets">
+            <span aria-hidden="true">⌂</span>
+          </button>
+          <button id="saveBudgetButton" class="dashboard-save-button" type="button" aria-label="Save budget">
+            <span aria-hidden="true">✓</span>
+            <span id="dashboardSaveLabel">Save</span>
+          </button>
+        </div>
 
         <div class="dashboard-heading">
           <div>

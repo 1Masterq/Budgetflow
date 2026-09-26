@@ -609,6 +609,36 @@ header p {
   background: linear-gradient(135deg, #7d8f62 0%, #a4ae78 100%);
 }
 
+.dashboard-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.dashboard-save-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 86px;
+  background: linear-gradient(135deg, #7d8f62 0%, #a4ae78 100%);
+  border: 0;
+  border-radius: 999px;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  min-height: 34px;
+  padding: 7px 12px;
+}
+
+.dashboard-save-button.saved {
+  background: linear-gradient(135deg, #5c956c 0%, #7ab889 100%);
+}
+
+.dashboard-save-button:hover,
 #setBudgetBtn:hover {
   background: linear-gradient(135deg, #66764f 0%, #8e9b65 100%);
   transform: translateY(-1px);
