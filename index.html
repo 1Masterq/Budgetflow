@@ -3,21 +3,142 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Market List Calculator</title>
+    <meta name="theme-color" content="#f4efe6" />
+    <meta name="description" content="Budgetflow is a simple market budget tracker that works offline." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>Budgetflow</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="icons/icon-192.svg" />
+    <link rel="apple-touch-icon" href="icons/icon-192.svg" />
     <link rel="stylesheet" href="style.css" />
   </head>
 
   <body>
     <div class="container">
       <header>
-        <h1>🛒 Budgetflow</h1>
-        <p>Calculate your shopping expenses easily</p>
+        <div class="header-copy">
+          <h1>🛒 Budgetflow</h1>
+          <p>Plan your market. Know your spend.</p>
+        </div>
+        <div class="header-actions">
+          <button id="themeToggle" class="theme-toggle" type="button" role="switch" aria-label="Switch to dark mode" aria-checked="false">
+            <span class="theme-icon" aria-hidden="true">☾</span>
+            <span class="theme-switch" aria-hidden="true"><span class="theme-knob"></span></span>
+            <span class="theme-label">Dark</span>
+          </button>
+          <button id="installBtn" class="install-btn hidden" type="button">⬇ Install</button>
+        </div>
       </header>
+
+      <main id="homeView" class="home-view">
+        <section class="home-intro">
+          <div>
+            <span class="eyebrow">Your spending companion</span>
+            <h2>Make every naira feel intentional.</h2>
+            <p>Set a budget, plan your purchases, and keep your spending visible in one calm space.</p>
+          </div>
+          <div class="home-mark" aria-hidden="true">₦</div>
+        </section>
+
+        <section class="home-snapshot" aria-label="Budget snapshot">
+          <div class="home-snapshot-card">
+            <span>Current budget</span>
+            <strong id="homeBudgetDisplay">₦0</strong>
+          </div>
+          <div class="home-snapshot-card">
+            <span>Already spent</span>
+            <strong id="homeSpentDisplay">₦0</strong>
+          </div>
+          <div class="home-snapshot-card">
+            <span>Items planned</span>
+            <strong id="homeItemCount">0</strong>
+          </div>
+        </section>
+
+        <section class="home-actions">
+          <button id="openDashboardBtn" class="home-primary-action" type="button">Open budget dashboard <span aria-hidden="true">→</span></button>
+          <button id="homeAddItemBtn" class="home-secondary-action" type="button">+ Add an item</button>
+        </section>
+
+        <section class="recent-panel">
+          <div class="section-heading">
+            <h3>Recent items</h3>
+            <button id="homeViewAllBtn" class="text-button" type="button">View all</button>
+          </div>
+          <div id="homeRecentItems" class="recent-items"></div>
+        </section>
+      </main>
+
+      <main id="dashboardView" class="dashboard-view hidden">
+        <button id="backHomeBtn" class="back-button" type="button" aria-label="Return home" title="Return home">
+          <span aria-hidden="true">⌂</span>
+        </button>
+
+      <section class="budget-setup">
+        <div>
+          <label for="budget">Set Your Budget</label>
+          <input type="number" id="budget" placeholder="e.g. 50000" min="0" />
+        </div>
+
+        <button id="setBudgetBtn" type="button">Set Budget</button>
+      </section>
+
+      <section class="summary">
+        <div class="summary-card">
+          <span>Budget</span>
+          <strong id="budgetDisplay">₦0</strong>
+        </div>
+
+        <div class="summary-card">
+          <span>Total Spent</span>
+          <strong id="spentDisplay">₦0</strong>
+        </div>
+
+        <div class="summary-card">
+          <span>Remaining</span>
+          <strong id="remainingDisplay">₦0</strong>
+        </div>
+      </section>
+
+      <section class="progress-section">
+        <div class="progress-header">
+          <span>Budget Used</span>
+          <strong id="percentage">0%</strong>
+        </div>
+
+        <div class="progress-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="progress-meta">
+          <p id="budgetMessage">Set a budget to start tracking your spending.</p>
+          <span id="budgetInsight" class="budget-insight neutral">Waiting for budget</span>
+        </div>
+      </section>
+
+      <section class="category-panel">
+        <div class="category-panel-header">
+          <h3>Spending by Category</h3>
+        </div>
+        <div id="categoryBreakdown" class="category-breakdown"></div>
+      </section>
 
       <section class="input-section">
         <div class="input-group">
           <label for="item">Item</label>
           <input type="text" id="item" placeholder="e.g. Yam" />
+        </div>
+
+        <div class="input-group">
+          <label for="category">Category</label>
+          <select id="category">
+            <option value="Food">Food</option>
+            <option value="Groceries">Groceries</option>
+            <option value="Transport">Transport</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
 
         <div class="input-group">
@@ -33,24 +154,13 @@
         <button id="addItemBtn" class="add-btn" type="button">+ Add Item</button>
       </section>
 
-      <div class="summary">
-        <div>
-          <span>Items</span>
-          <strong id="itemCount">0</strong>
-        </div>
-
-        <div>
-          <span>Total</span>
-          <strong id="sumTotal">₦0</strong>
-        </div>
-      </div>
-
       <div class="table-container">
         <table>
           <thead>
             <tr>
               <th>#</th>
               <th>Item</th>
+              <th>Category</th>
               <th>Qty</th>
               <th>Unit Price</th>
               <th>Total</th>
@@ -58,24 +168,25 @@
             </tr>
           </thead>
 
-          <tbody id="marketList">
-            <!-- JavaScript will add items here -->
-          </tbody>
+          <tbody id="marketList"></tbody>
         </table>
 
         <div id="emptyMessage" class="empty-message">
           <div class="empty-icon">🛒</div>
-          <h3>No items yet</h3>
-          <p>Add something to your market list above.</p>
+          <h3>Your budget list is empty</h3>
+          <p>Add your first item above.</p>
         </div>
       </div>
 
       <div class="grand-total">
-        <span>SUM TOTAL</span>
+        <span>TOTAL MARKET COST</span>
         <strong id="grandTotal">₦0</strong>
       </div>
 
-      <button id="clearListBtn" class="clear-btn" type="button">🗑 Clear List</button>
+      <div class="action-row">
+        <button id="clearListBtn" class="clear-btn" type="button">🗑 Clear List</button>
+      </div>
+      </main>
     </div>
 
     <script src="script.js"></script>
