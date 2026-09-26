@@ -246,19 +246,22 @@ header p {
 }
 
 .saved-budget-card {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
   padding: 13px;
   border: 1px solid var(--border);
   border-radius: 15px;
   background: var(--surface-soft);
+  cursor: pointer;
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
 .saved-budget-card:hover,
-.saved-budget-card.active {
+.saved-budget-card.active,
+.saved-budget-card:focus-visible {
   border-color: var(--primary);
 }
 
@@ -290,43 +293,64 @@ header p {
 }
 
 .saved-budget-actions {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.saved-budget-open,
-.saved-budget-delete {
-  min-height: 29px;
-  border-radius: 999px;
-  cursor: pointer;
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.saved-budget-open {
-  padding: 6px 10px;
-  border: 0;
-  background: var(--primary);
-  color: white;
-}
-
-.saved-budget-open:hover {
-  background: var(--primary-dark);
-}
-
-.saved-budget-delete {
-  width: 29px;
-  padding: 0;
+.saved-budget-menu-button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0 0 5px;
   border: 1px solid var(--border);
+  border-radius: 50%;
   background: transparent;
   color: var(--muted);
-  font-size: 1rem;
+  cursor: pointer;
+  font-size: 1.15rem;
   line-height: 1;
 }
 
-.saved-budget-delete:hover {
-  border-color: var(--danger);
+.saved-budget-menu-button:hover,
+.saved-budget-menu-button[aria-expanded="true"] {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.saved-budget-menu {
+  position: absolute;
+  z-index: 2;
+  top: 37px;
+  right: 0;
+  display: grid;
+  min-width: 100px;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface);
+  box-shadow: 0 10px 20px var(--shadow);
+}
+
+.saved-budget-menu button {
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  text-align: left;
+}
+
+.saved-budget-menu button:hover {
+  background: var(--surface-soft);
+}
+
+.saved-budget-menu .danger-action {
   color: var(--danger);
 }
 

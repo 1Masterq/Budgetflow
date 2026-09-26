@@ -35,7 +35,6 @@ const ui = {
   homeViewAllButton: document.getElementById("homeViewAllBtn"),
   backHomeButton: document.getElementById("backHomeBtn"),
   createBudgetButton: document.getElementById("createBudgetBtn"),
-  dashboardNewBudgetButton: document.getElementById("dashboardNewBudgetBtn"),
   newBudgetNameInput: document.getElementById("newBudgetName"),
   newBudgetAmountInput: document.getElementById("newBudgetAmount"),
   savedBudgets: document.getElementById("savedBudgets"),
@@ -117,13 +116,6 @@ function init() {
 
   if (ui.createBudgetButton) {
     ui.createBudgetButton.addEventListener("click", createBudget);
-  }
-
-  if (ui.dashboardNewBudgetButton) {
-    ui.dashboardNewBudgetButton.addEventListener("click", () => {
-      showHome();
-      ui.newBudgetNameInput?.focus();
-    });
   }
 
   if (ui.openDashboardButton) {
@@ -286,6 +278,23 @@ function deleteBudget(id) {
 
   saveState();
   updateSavedBudgets();
+}
+
+function renameBudget(id) {
+  const selectedBudget = budgets.find((entry) => entry.id === id);
+  if (!selectedBudget) {
+    return;
+  }
+
+  const nextName = prompt("Rename budget", selectedBudget.name)?.trim();
+  if (!nextName) {
+    return;
+  }
+
+  selectedBudget.name = nextName;
+  saveState();
+  updateSavedBudgets();
+  updateActiveBudgetHeading();
 }
 
 function createId() {
@@ -465,6 +474,19 @@ function updateSavedBudgets() {
   budgets.forEach((entry) => {
     const card = document.createElement("article");
     card.className = `saved-budget-card${entry.id === activeBudgetId ? " active" : ""}`;
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", `Open ${entry.name}`);
+    card.addEventListener("click", () => {
+      activateBudget(entry.id);
+      showDashboard();
+    });
+    card.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        card.click();
+      }
+    });
 
     const cardMain = document.createElement("div");
     cardMain.className = "saved-budget-main";
@@ -481,23 +503,56 @@ function updateSavedBudgets() {
 
     const actions = document.createElement("div");
     actions.className = "saved-budget-actions";
-    const openButton = document.createElement("button");
-    openButton.type = "button";
-    openButton.className = "saved-budget-open";
-    openButton.textContent = entry.id === activeBudgetId ? "Open" : "Use";
-    openButton.addEventListener("click", () => {
+    const menuButton = document.createElement("button");
+    menuButton.type = "button";
+    menuButton.className = "saved-budget-menu-button";
+    menuButton.setAttribute("aria-label", `Actions for ${entry.name}`);
+    menuButton.setAttribute("aria-expanded", "false");
+    menuButton.textContent = "⋯";
+
+    const menu = document.createElement("div");
+    menu.className = "saved-budget-menu hidden";
+
+    const renameButton = document.createElement("button");
+    renameButton.type = "button";
+    renameButton.textContent = "Rename";
+    renameButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      menu.classList.add("hidden");
+      renameBudget(entry.id);
+    });
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.textContent = "Edit";
+    editButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      menu.classList.add("hidden");
       activateBudget(entry.id);
       showDashboard();
     });
 
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
-    deleteButton.className = "saved-budget-delete";
-    deleteButton.setAttribute("aria-label", `Delete ${entry.name}`);
-    deleteButton.title = "Delete budget";
-    deleteButton.textContent = "×";
-    deleteButton.addEventListener("click", () => deleteBudget(entry.id));
-    actions.append(openButton, deleteButton);
+    deleteButton.className = "danger-action";
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      menu.classList.add("hidden");
+      deleteBudget(entry.id);
+    });
+
+    menu.append(renameButton, editButton, deleteButton);
+    menuButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const isOpen = !menu.classList.contains("hidden");
+      document.querySelectorAll(".saved-budget-menu").forEach((item) => item.classList.add("hidden"));
+      document.querySelectorAll(".saved-budget-menu-button").forEach((item) => item.setAttribute("aria-expanded", "false"));
+      menu.classList.toggle("hidden", isOpen);
+      menuButton.setAttribute("aria-expanded", String(!isOpen));
+    });
+
+    actions.append(menuButton, menu);
 
     card.append(cardMain, amount, actions);
     ui.savedBudgets.appendChild(card);
