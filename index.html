@@ -35,49 +35,60 @@
         <section class="home-intro">
           <div>
             <span class="eyebrow">Your spending companion</span>
-            <h2>Make every naira feel intentional.</h2>
-            <p>Set a budget, plan your purchases, and keep your spending visible in one calm space.</p>
+            <h2>Your budgets, all in one place.</h2>
+            <p>Create a budget for groceries, a trip, a month, or anything else you want to plan.</p>
           </div>
           <div class="home-mark" aria-hidden="true">₦</div>
         </section>
 
-        <section class="home-snapshot" aria-label="Budget snapshot">
-          <div class="home-snapshot-card">
-            <span>Current budget</span>
-            <strong id="homeBudgetDisplay">₦0</strong>
-          </div>
-          <div class="home-snapshot-card">
-            <span>Already spent</span>
-            <strong id="homeSpentDisplay">₦0</strong>
-          </div>
-          <div class="home-snapshot-card">
-            <span>Items planned</span>
-            <strong id="homeItemCount">0</strong>
-          </div>
-        </section>
-
-        <section class="home-actions">
-          <button id="openDashboardBtn" class="home-primary-action" type="button">Open budget dashboard <span aria-hidden="true">→</span></button>
-          <button id="homeAddItemBtn" class="home-secondary-action" type="button">+ Add an item</button>
-        </section>
-
-        <section class="recent-panel">
+        <section class="new-budget-panel" aria-label="Create a budget">
           <div class="section-heading">
-            <h3>Recent items</h3>
-            <button id="homeViewAllBtn" class="text-button" type="button">View all</button>
+            <div>
+              <span class="eyebrow">New budget</span>
+              <h3>Start a fresh plan</h3>
+            </div>
           </div>
-          <div id="homeRecentItems" class="recent-items"></div>
+          <div class="new-budget-fields">
+            <div class="input-group">
+              <label for="newBudgetName">Budget name</label>
+              <input id="newBudgetName" type="text" placeholder="e.g. December groceries" maxlength="50" />
+            </div>
+            <div class="input-group">
+              <label for="newBudgetAmount">Amount (₦)</label>
+              <input id="newBudgetAmount" type="number" placeholder="e.g. 50000" min="0" />
+            </div>
+            <button id="createBudgetBtn" class="home-primary-action" type="button">Save budget <span aria-hidden="true">+</span></button>
+          </div>
+        </section>
+
+        <section class="saved-budgets-panel">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Your workspace</span>
+              <h3>Saved budgets</h3>
+            </div>
+            <span id="budgetCount" class="panel-count">0 budgets</span>
+          </div>
+          <div id="savedBudgets" class="saved-budgets"></div>
         </section>
       </main>
 
       <main id="dashboardView" class="dashboard-view hidden">
-        <button id="backHomeBtn" class="back-button" type="button" aria-label="Return home" title="Return home">
+        <button id="backHomeBtn" class="back-button" type="button" aria-label="Return to budgets" title="Return to budgets">
           <span aria-hidden="true">⌂</span>
         </button>
 
+        <div class="dashboard-heading">
+          <div>
+            <span class="eyebrow">Active budget</span>
+            <h2 id="activeBudgetName">My Budget</h2>
+          </div>
+          <button id="dashboardNewBudgetBtn" class="text-button" type="button">+ New budget</button>
+        </div>
+
       <section class="budget-setup">
         <div>
-          <label for="budget">Set Your Budget</label>
+          <label for="budget">Budget amount</label>
           <input type="number" id="budget" placeholder="e.g. 50000" min="0" />
         </div>
 

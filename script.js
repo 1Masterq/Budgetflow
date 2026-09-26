@@ -1,8 +1,11 @@
 const STORAGE_KEY = "budgetflow-app";
 const THEME_KEY = "budgetflow-theme";
 const state = loadState();
-const marketItems = state.items;
-let budget = state.budget;
+const budgets = state.budgets;
+let activeBudgetId = state.activeBudgetId || (budgets[0] ? budgets[0].id : null);
+let activeBudget = budgets.find((entry) => entry.id === activeBudgetId) || budgets[0] || null;
+let marketItems = activeBudget ? activeBudget.items : [];
+let budget = activeBudget ? activeBudget.amount : 0;
 
 const ui = {
   budgetInput: document.getElementById("budget"),
@@ -31,10 +34,13 @@ const ui = {
   homeAddItemButton: document.getElementById("homeAddItemBtn"),
   homeViewAllButton: document.getElementById("homeViewAllBtn"),
   backHomeButton: document.getElementById("backHomeBtn"),
-  homeBudgetDisplay: document.getElementById("homeBudgetDisplay"),
-  homeSpentDisplay: document.getElementById("homeSpentDisplay"),
-  homeItemCount: document.getElementById("homeItemCount"),
-  homeRecentItems: document.getElementById("homeRecentItems"),
+  createBudgetButton: document.getElementById("createBudgetBtn"),
+  dashboardNewBudgetButton: document.getElementById("dashboardNewBudgetBtn"),
+  newBudgetNameInput: document.getElementById("newBudgetName"),
+  newBudgetAmountInput: document.getElementById("newBudgetAmount"),
+  savedBudgets: document.getElementById("savedBudgets"),
+  budgetCount: document.getElementById("budgetCount"),
+  activeBudgetName: document.getElementById("activeBudgetName"),
   itemCount: document.getElementById("itemCount"),
   sumTotal: document.getElementById("sumTotal"),
   categoryBreakdown: document.getElementById("categoryBreakdown"),
@@ -46,22 +52,52 @@ function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (!saved) {
-      return { items: [], budget: 0 };
+      return { budgets: [], activeBudgetId: null };
     }
 
     const parsed = JSON.parse(saved);
+    if (Array.isArray(parsed.budgets)) {
+      return {
+        budgets: parsed.budgets.map((entry) => ({
+          id: String(entry.id),
+          name: entry.name || "Untitled budget",
+          amount: Number(entry.amount) || 0,
+          items: Array.isArray(entry.items) ? entry.items : [],
+        })),
+        activeBudgetId: parsed.activeBudgetId ? String(parsed.activeBudgetId) : null,
+      };
+    }
+
+    const legacyItems = Array.isArray(parsed.items) ? parsed.items : [];
+    const legacyBudget = Number(parsed.budget) || 0;
+    if (legacyItems.length > 0 || legacyBudget > 0) {
+      const migratedBudget = {
+        id: createId(),
+        name: "My Budget",
+        amount: legacyBudget,
+        items: legacyItems,
+      };
+      return { budgets: [migratedBudget], activeBudgetId: migratedBudget.id };
+    }
+
     return {
-      items: Array.isArray(parsed.items) ? parsed.items : [],
-      budget: Number(parsed.budget) || 0,
+      budgets: [],
+      activeBudgetId: null,
     };
   } catch (error) {
     console.warn("Could not load app state:", error);
-    return { items: [], budget: 0 };
+    return { budgets: [], activeBudgetId: null };
   }
 }
 
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ items: marketItems, budget }));
+  if (activeBudget) {
+    activeBudget.name = activeBudget.name || "Untitled budget";
+    activeBudget.amount = budget;
+    activeBudget.items = marketItems;
+  }
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ budgets, activeBudgetId }));
 }
 
 function init() {
@@ -77,6 +113,17 @@ function init() {
 
   if (ui.clearButton) {
     ui.clearButton.addEventListener("click", clearEverything);
+  }
+
+  if (ui.createBudgetButton) {
+    ui.createBudgetButton.addEventListener("click", createBudget);
+  }
+
+  if (ui.dashboardNewBudgetButton) {
+    ui.dashboardNewBudgetButton.addEventListener("click", () => {
+      showHome();
+      ui.newBudgetNameInput?.focus();
+    });
   }
 
   if (ui.openDashboardButton) {
@@ -115,8 +162,15 @@ function init() {
 }
 
 function showDashboard() {
+  if (!activeBudget) {
+    showHome();
+    ui.newBudgetNameInput?.focus();
+    return;
+  }
+
   ui.homeView?.classList.add("hidden");
   ui.dashboardView?.classList.remove("hidden");
+  updateActiveBudgetHeading();
 }
 
 function showHome() {
@@ -152,6 +206,10 @@ function applyTheme(theme) {
 }
 
 function setBudget() {
+  if (!activeBudget) {
+    return;
+  }
+
   const value = Number(ui.budgetInput.value);
 
   if (!Number.isFinite(value) || value < 0) {
@@ -162,6 +220,76 @@ function setBudget() {
   budget = value;
   saveState();
   renderList();
+}
+
+function createBudget() {
+  const name = ui.newBudgetNameInput.value.trim();
+  const amount = Number(ui.newBudgetAmountInput.value);
+
+  if (!name) {
+    alert("Please give this budget a name.");
+    return;
+  }
+
+  if (!Number.isFinite(amount) || amount < 0) {
+    alert("Please enter a valid budget amount.");
+    return;
+  }
+
+  const newBudget = {
+    id: createId(),
+    name,
+    amount,
+    items: [],
+  };
+
+  budgets.unshift(newBudget);
+  activateBudget(newBudget.id);
+  ui.newBudgetNameInput.value = "";
+  ui.newBudgetAmountInput.value = "";
+  showDashboard();
+}
+
+function activateBudget(id) {
+  const selectedBudget = budgets.find((entry) => entry.id === id);
+  if (!selectedBudget) {
+    return;
+  }
+
+  activeBudgetId = selectedBudget.id;
+  activeBudget = selectedBudget;
+  marketItems = activeBudget.items;
+  budget = activeBudget.amount;
+  saveState();
+  renderList();
+  updateActiveBudgetHeading();
+  updateSavedBudgets();
+}
+
+function deleteBudget(id) {
+  const selectedBudget = budgets.find((entry) => entry.id === id);
+  if (!selectedBudget || !confirm(`Delete "${selectedBudget.name}"?`)) {
+    return;
+  }
+
+  const index = budgets.findIndex((entry) => entry.id === id);
+  budgets.splice(index, 1);
+
+  if (activeBudgetId === id) {
+    activeBudget = budgets[0] || null;
+    activeBudgetId = activeBudget ? activeBudget.id : null;
+    marketItems = activeBudget ? activeBudget.items : [];
+    budget = activeBudget ? activeBudget.amount : 0;
+    renderList();
+    showHome();
+  }
+
+  saveState();
+  updateSavedBudgets();
+}
+
+function createId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 function addItem() {
@@ -315,53 +443,71 @@ function updateTotal() {
   updateBudgetProgress(totalSpent);
   updateItemCount();
   updateCategoryBreakdown();
-  updateHomeSummary(totalSpent);
+  updateSavedBudgets();
 }
 
-function updateHomeSummary(totalSpent) {
-  if (ui.homeBudgetDisplay) {
-    ui.homeBudgetDisplay.textContent = formatMoney(budget);
-  }
-
-  if (ui.homeSpentDisplay) {
-    ui.homeSpentDisplay.textContent = formatMoney(totalSpent);
-  }
-
-  if (ui.homeItemCount) {
-    ui.homeItemCount.textContent = String(marketItems.length);
-  }
-
-  if (!ui.homeRecentItems) {
+function updateSavedBudgets() {
+  if (!ui.savedBudgets) {
     return;
   }
 
-  ui.homeRecentItems.innerHTML = "";
+  ui.savedBudgets.innerHTML = "";
+  ui.budgetCount.textContent = `${budgets.length} ${budgets.length === 1 ? "budget" : "budgets"}`;
 
-  if (marketItems.length === 0) {
+  if (budgets.length === 0) {
     const empty = document.createElement("p");
-    empty.className = "recent-empty";
-    empty.textContent = "Your recent items will appear here.";
-    ui.homeRecentItems.appendChild(empty);
+    empty.className = "saved-budgets-empty";
+    empty.textContent = "Your saved budgets will appear here.";
+    ui.savedBudgets.appendChild(empty);
     return;
   }
 
-  marketItems.slice(-3).reverse().forEach((item) => {
-    const row = document.createElement("div");
-    row.className = "recent-item";
+  budgets.forEach((entry) => {
+    const card = document.createElement("article");
+    card.className = `saved-budget-card${entry.id === activeBudgetId ? " active" : ""}`;
 
-    const details = document.createElement("div");
+    const cardMain = document.createElement("div");
+    cardMain.className = "saved-budget-main";
     const name = document.createElement("strong");
-    name.textContent = item.name;
-    const category = document.createElement("span");
-    category.textContent = `${item.category || "Other"} · Qty ${item.quantity}`;
-    details.append(name, category);
+    name.textContent = entry.name;
+    const spent = entry.items.reduce((sum, item) => sum + item.quantity * item.amount, 0);
+    const details = document.createElement("span");
+    details.textContent = `${entry.items.length} ${entry.items.length === 1 ? "item" : "items"} · ${formatMoney(spent)} spent`;
+    cardMain.append(name, details);
 
-    const total = document.createElement("strong");
-    total.textContent = formatMoney(item.quantity * item.amount);
+    const amount = document.createElement("strong");
+    amount.className = "saved-budget-amount";
+    amount.textContent = formatMoney(entry.amount);
 
-    row.append(details, total);
-    ui.homeRecentItems.appendChild(row);
+    const actions = document.createElement("div");
+    actions.className = "saved-budget-actions";
+    const openButton = document.createElement("button");
+    openButton.type = "button";
+    openButton.className = "saved-budget-open";
+    openButton.textContent = entry.id === activeBudgetId ? "Open" : "Use";
+    openButton.addEventListener("click", () => {
+      activateBudget(entry.id);
+      showDashboard();
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "saved-budget-delete";
+    deleteButton.setAttribute("aria-label", `Delete ${entry.name}`);
+    deleteButton.title = "Delete budget";
+    deleteButton.textContent = "×";
+    deleteButton.addEventListener("click", () => deleteBudget(entry.id));
+    actions.append(openButton, deleteButton);
+
+    card.append(cardMain, amount, actions);
+    ui.savedBudgets.appendChild(card);
   });
+}
+
+function updateActiveBudgetHeading() {
+  if (ui.activeBudgetName) {
+    ui.activeBudgetName.textContent = activeBudget ? activeBudget.name : "My Budget";
+  }
 }
 
 function updateCategoryBreakdown() {

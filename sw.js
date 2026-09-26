@@ -1,4 +1,4 @@
-const CACHE_NAME = "budgetflow-v2";
+const CACHE_NAME = "budgetflow-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
