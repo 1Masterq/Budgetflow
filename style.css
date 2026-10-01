@@ -975,6 +975,41 @@ tbody tr:hover {
   color: #513b2f;
 }
 
+.install-dialog {
+  width: min(420px, calc(100vw - 32px));
+  margin: auto;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 20px 60px rgba(28, 22, 17, 0.28);
+}
+
+.install-dialog::backdrop {
+  background: rgba(25, 21, 18, 0.5);
+}
+
+.install-dialog-content h2 {
+  margin-bottom: 12px;
+  font-size: 1.25rem;
+}
+
+.install-dialog-content ol {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 18px 20px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.install-dialog-content .home-primary-action {
+  width: 100%;
+  min-height: 40px;
+  border: 0;
+}
+
 .hidden {
   display: none;
 }

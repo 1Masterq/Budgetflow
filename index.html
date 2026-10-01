@@ -6,12 +6,14 @@
     <meta name="theme-color" content="#f4efe6" />
     <meta name="description" content="Budgetflow is a simple market budget tracker that works offline." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Budgetflow" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Budgetflow</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" type="image/svg+xml" href="icons/icon-192.svg" />
-    <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
     <link rel="stylesheet" href="style.css" />
+    <script defer src="/_vercel/insights/script.js"></script>
   </head>
 
   <body>
@@ -204,6 +206,19 @@
       </div>
       </main>
     </div>
+
+    <dialog id="iosInstallDialog" class="install-dialog" aria-labelledby="iosInstallTitle">
+      <div class="install-dialog-content">
+        <span class="eyebrow">Install Budgetflow</span>
+        <h2 id="iosInstallTitle">Add it to your Home Screen</h2>
+        <ol>
+          <li>Open this page in Safari.</li>
+          <li>Tap the Share button.</li>
+          <li>Choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>.</li>
+        </ol>
+        <button id="iosInstallDismiss" class="home-primary-action" type="button">Got it</button>
+      </div>
+    </dialog>
 
     <script src="script.js"></script>
   </body>

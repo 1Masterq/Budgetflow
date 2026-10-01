@@ -1,10 +1,13 @@
-const CACHE_NAME = "budgetflow-v4";
+const CACHE_NAME = "budgetflow-v6";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
   "./manifest.webmanifest",
+  "./icons/apple-touch-icon.png",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png",
   "./icons/icon-192.svg",
   "./icons/icon-512.svg"
 ];

@@ -29,6 +29,8 @@ const ui = {
   setBudgetButton: document.getElementById("setBudgetBtn"),
   clearButton: document.getElementById("clearListBtn"),
   installButton: document.getElementById("installBtn"),
+  iosInstallDialog: document.getElementById("iosInstallDialog"),
+  iosInstallDismiss: document.getElementById("iosInstallDismiss"),
   themeToggle: document.getElementById("themeToggle"),
   homeView: document.getElementById("homeView"),
   dashboardView: document.getElementById("dashboardView"),
@@ -737,8 +739,29 @@ function setupInstallPrompt() {
     return;
   }
 
-  if (!window.matchMedia("(display-mode: standalone)").matches) {
-    ui.installButton.classList.remove("hidden");
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent)
+    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isInstalled = window.matchMedia("(display-mode: standalone)").matches
+    || navigator.standalone === true;
+
+  if (isInstalled) {
+    ui.installButton.classList.add("hidden");
+    return;
+  }
+
+  ui.installButton.classList.remove("hidden");
+
+  if (isIos) {
+    ui.installButton.textContent = "Add to Home Screen";
+    ui.installButton.addEventListener("click", () => {
+      if (ui.iosInstallDialog?.showModal) {
+        ui.iosInstallDialog.showModal();
+      } else {
+        alert("In Safari, tap Share, then choose Add to Home Screen.");
+      }
+    });
+  } else {
+    ui.installButton.textContent = "⬇ Download on device";
   }
 
   window.addEventListener("beforeinstallprompt", (event) => {
@@ -753,6 +776,10 @@ function setupInstallPrompt() {
   });
 
   ui.installButton.addEventListener("click", async () => {
+    if (isIos) {
+      return;
+    }
+
     if (!deferredPrompt) {
       alert("This browser may not support automatic install prompts. You can still use the app in the browser.");
       return;
@@ -763,6 +790,8 @@ function setupInstallPrompt() {
     deferredPrompt = null;
     ui.installButton.classList.add("hidden");
   });
+
+  ui.iosInstallDismiss?.addEventListener("click", () => ui.iosInstallDialog.close());
 }
 
 window.setBudget = setBudget;
