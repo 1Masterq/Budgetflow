@@ -1,0 +1,21 @@
+{
+  "name": "budgetflow",
+  "version": "1.0.0",
+  "description": "Budgetflow is a simple market budget tracker that works offline.",
+  "main": "script.js",
+  "scripts": {
+    "dev": "npx serve .",
+    "lint": "npx eslint script.js || true"
+  },
+  "keywords": [
+    "budget",
+    "tracker",
+    "offline",
+    "pwa"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@vercel/analytics": "^1.3.1"
+  }
+}
